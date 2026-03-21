@@ -14,6 +14,7 @@
       --card: #ffffff;
       --accent: #ff3b00;
       --accent2: #00c2a8;
+      --spotify: #1DB954;
       --muted: #888;
       --border: #e0dbd0;
       --radius: 3px;
@@ -60,7 +61,6 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* ── Card ── */
     .card {
       background: var(--card);
       border: 2px solid var(--ink);
@@ -70,7 +70,6 @@
       margin-bottom: 16px;
     }
 
-    /* ── Type ── */
     .logo {
       font-size: 11px;
       font-family: 'Syne Mono', monospace;
@@ -87,11 +86,7 @@
       margin-bottom: 10px;
     }
 
-    h2 {
-      font-size: 1.5rem;
-      font-weight: 800;
-      margin-bottom: 20px;
-    }
+    h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; }
 
     .subtitle {
       font-family: 'Syne Mono', monospace;
@@ -100,7 +95,6 @@
       margin-bottom: 32px;
     }
 
-    /* ── Form ── */
     label {
       display: block;
       font-family: 'Syne Mono', monospace;
@@ -125,9 +119,7 @@
       transition: box-shadow 0.15s;
     }
 
-    input:focus, select:focus {
-      box-shadow: 3px 3px 0 var(--accent);
-    }
+    input:focus, select:focus { box-shadow: 3px 3px 0 var(--accent); }
 
     .form-row {
       display: grid;
@@ -135,7 +127,6 @@
       gap: 14px;
     }
 
-    /* ── Buttons ── */
     .btn {
       display: flex;
       align-items: center;
@@ -153,6 +144,7 @@
       box-shadow: var(--shadow);
       transition: transform 0.1s, box-shadow 0.1s;
       width: 100%;
+      text-decoration: none;
     }
 
     .btn:active { transform: translate(3px,3px); box-shadow: 1px 1px 0 var(--ink); }
@@ -162,6 +154,7 @@
     .btn-dark     { background: var(--ink); color: #fff; }
     .btn-ghost    { background: transparent; color: var(--ink); }
     .btn-green    { background: var(--accent2); color: #fff; }
+    .btn-spotify  { background: var(--spotify); color: #fff; }
 
     .btn-row {
       display: grid;
@@ -170,7 +163,31 @@
       margin-top: 12px;
     }
 
-    /* ── Album art ── */
+    /* User bar */
+    .user-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      border: 2px solid var(--ink);
+      border-radius: var(--radius);
+      background: var(--bg);
+      margin-bottom: 20px;
+      font-size: 13px;
+    }
+
+    .user-bar .name { font-weight: 700; }
+    .user-bar .logout {
+      font-family: 'Syne Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .user-bar .logout:hover { color: var(--accent); }
+
+    /* Album art */
     .art-wrap {
       width: 100%;
       aspect-ratio: 1;
@@ -182,11 +199,7 @@
       margin-bottom: 20px;
     }
 
-    .art-wrap img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-      display: block;
-    }
+    .art-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
     .art-blur {
       position: absolute;
@@ -202,7 +215,7 @@
 
     .art-blur.gone { opacity: 0; pointer-events: none; }
 
-    /* ── Player ── */
+    /* Player */
     .player-row {
       display: flex;
       align-items: center;
@@ -229,8 +242,7 @@
     .play-btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--ink); }
 
     .progress-wrap {
-      flex: 1;
-      height: 8px;
+      flex: 1; height: 8px;
       background: var(--border);
       border: 2px solid var(--ink);
       border-radius: 99px;
@@ -253,14 +265,14 @@
       text-align: right;
     }
 
-    /* ── Answer card ── */
+    /* Answer */
     .answer-wrap {
       border: 2px solid var(--ink);
       border-radius: var(--radius);
       padding: 20px;
       text-align: center;
       margin-bottom: 16px;
-      transition: background 0.3s, border-style 0.3s;
+      transition: background 0.3s;
     }
 
     .answer-wrap.hidden {
@@ -277,65 +289,50 @@
     .song-title  { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
     .song-artist { font-family: 'Syne Mono', monospace; font-size: 13px; }
 
-    /* ── Round badge ── */
+    /* Round badge + score */
+    .game-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
     .round-badge {
-      display: inline-block;
       font-family: 'Syne Mono', monospace;
       font-size: 11px;
       padding: 4px 12px;
       border: 2px solid var(--ink);
       border-radius: 99px;
       background: var(--bg);
-      margin-bottom: 18px;
     }
 
-    /* ── Scoreboard ── */
-    .podium-row {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 14px 0;
-      border-bottom: 2px solid var(--border);
-    }
-
-    .podium-row:last-child { border-bottom: none; }
-
-    .medal { font-size: 1.8rem; width: 40px; text-align: center; flex-shrink: 0; }
-    .podium-name { font-size: 1rem; font-weight: 700; flex: 1; }
-    .podium-pts {
-      font-family: 'Syne Mono', monospace;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--accent);
-    }
-
-    /* ── Score display ── */
-    .score-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 18px;
-      padding: 10px 16px;
-      border: 2px solid var(--ink);
-      border-radius: var(--radius);
-      background: var(--bg);
-    }
-
-    .score-label {
+    .score-pill {
       font-family: 'Syne Mono', monospace;
       font-size: 11px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
+      padding: 4px 12px;
+      border: 2px solid var(--ink);
+      border-radius: 99px;
+      background: var(--ink);
+      color: #fff;
     }
 
-    .score-value {
-      font-size: 1.2rem;
-      font-weight: 800;
-      color: var(--accent);
+    .score-pill span { color: var(--accent); font-weight: 800; }
+
+    /* Scoreboard */
+    .result-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
     }
 
-    /* ── Error ── */
+    .result-row:last-child { border-bottom: none; }
+    .result-icon { font-size: 1.1rem; flex-shrink: 0; }
+    .result-name { font-weight: 700; font-size: 14px; }
+    .result-artist { font-family: 'Syne Mono', monospace; font-size: 11px; color: var(--muted); }
+
+    /* Error */
     .error-msg {
       display: none;
       background: #fff0ee;
@@ -348,10 +345,9 @@
       margin-bottom: 14px;
     }
 
-    /* ── Loading ── */
+    /* Loading */
     .loading-bar {
-      width: 100%;
-      height: 3px;
+      width: 100%; height: 3px;
       background: var(--border);
       margin-bottom: 20px;
       overflow: hidden;
@@ -361,8 +357,7 @@
     .loading-bar::after {
       content: '';
       display: block;
-      width: 40%;
-      height: 100%;
+      width: 40%; height: 100%;
       background: var(--accent);
       animation: slide 1s ease-in-out infinite;
     }
@@ -382,12 +377,27 @@
 </head>
 <body>
 
-  <!-- ── SETUP SCREEN ── -->
-  <div class="screen active" id="screen-setup">
+  <!-- ── LOGIN SCREEN ── -->
+  <div class="screen active" id="screen-login">
     <div class="card">
       <p class="logo">SongDrop</p>
       <h1>Name<br>That<br>Track.</h1>
       <p class="subtitle">// paste a playlist. guess the song.</p>
+      <a class="btn btn-spotify" href="/login">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+        Login with Spotify
+      </a>
+    </div>
+  </div>
+
+  <!-- ── SETUP SCREEN ── -->
+  <div class="screen" id="screen-setup">
+    <div class="card">
+      <p class="logo">SongDrop</p>
+      <div class="user-bar">
+        <span>👋 Hey, <span class="name" id="user-name">...</span></span>
+        <span class="logout" id="btn-logout">Log out</span>
+      </div>
 
       <div class="error-msg" id="setup-error"></div>
 
@@ -421,7 +431,7 @@
         <option value="random">Random snippet</option>
       </select>
 
-      <button class="btn btn-primary" id="btn-start">Load Playlist →</button>
+      <button class="btn btn-primary" id="btn-load">Load Playlist →</button>
     </div>
   </div>
 
@@ -437,12 +447,9 @@
   <!-- ── GAME SCREEN ── -->
   <div class="screen" id="screen-game">
     <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <div class="game-header">
         <div class="round-badge" id="round-badge">Round 1 / 10</div>
-        <div class="score-bar" style="margin:0;padding:6px 14px;">
-          <span class="score-label">Score&nbsp;</span>
-          <span class="score-value" id="score-display">0</span>
-        </div>
+        <div class="score-pill">Score <span id="score-display">0</span></div>
       </div>
 
       <div class="art-wrap">
@@ -460,7 +467,7 @@
 
       <div class="answer-wrap hidden" id="answer-wrap">
         <div class="song-title" id="answer-title">Song Title</div>
-        <div class="song-artist" id="answer-artist">Artist Name</div>
+        <div class="song-artist" id="answer-artist">Artist</div>
       </div>
 
       <div class="btn-row" id="controls-hidden">
@@ -480,7 +487,7 @@
     <div class="card">
       <p class="logo">Game Over</p>
       <h2>Final Score 🏆</h2>
-      <div id="final-score-display" style="text-align:center;padding:20px 0;">
+      <div style="text-align:center;padding:20px 0;">
         <div style="font-size:4rem;font-weight:800;color:var(--accent);" id="final-pts"></div>
         <div style="font-family:'Syne Mono',monospace;font-size:13px;color:var(--muted);margin-top:4px;" id="final-sub"></div>
       </div>
@@ -494,6 +501,7 @@
 
   <script>
     // ── State ─────────────────────────────────────────────────────────────────
+    let sessionId = null;
     let allTracks = [];
     let gameTracks = [];
     let currentRound = 0;
@@ -503,21 +511,66 @@
     let clipMode = 'beginning';
     let audioTimer = null;
     let isRevealed = false;
-    let roundResults = []; // {name, artist, got_it}
+    let roundResults = [];
 
     const audio = document.getElementById('audio');
     const playBtn = document.getElementById('play-btn');
     const progressFill = document.getElementById('progress-fill');
     const timerLabel = document.getElementById('timer-label');
 
-    // ── Screen switching ──────────────────────────────────────────────────────
+    // ── Init ──────────────────────────────────────────────────────────────────
+    async function init() {
+      // Check for session in URL
+      const params = new URLSearchParams(window.location.search);
+      const sid = params.get('session');
+
+      if (sid) {
+        // Clean up URL
+        window.history.replaceState({}, '', '/');
+        sessionId = sid;
+        localStorage.setItem('session_id', sid);
+        await loadUser();
+      } else {
+        // Check localStorage
+        const stored = localStorage.getItem('session_id');
+        if (stored) {
+          sessionId = stored;
+          await loadUser();
+        } else {
+          showScreen('login');
+        }
+      }
+    }
+
+    async function loadUser() {
+      try {
+        const res = await fetch(`/me?session_id=${sessionId}`);
+        if (!res.ok) throw new Error('Session expired');
+        const data = await res.json();
+        document.getElementById('user-name').textContent = data.name;
+        showScreen('setup');
+      } catch {
+        localStorage.removeItem('session_id');
+        sessionId = null;
+        showScreen('login');
+      }
+    }
+
+    // ── Screen ────────────────────────────────────────────────────────────────
     function showScreen(id) {
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.getElementById('screen-' + id).classList.add('active');
     }
 
-    // ── Setup ─────────────────────────────────────────────────────────────────
-    document.getElementById('btn-start').addEventListener('click', async () => {
+    // ── Logout ────────────────────────────────────────────────────────────────
+    document.getElementById('btn-logout').addEventListener('click', () => {
+      localStorage.removeItem('session_id');
+      sessionId = null;
+      showScreen('login');
+    });
+
+    // ── Load playlist ─────────────────────────────────────────────────────────
+    document.getElementById('btn-load').addEventListener('click', async () => {
       const url = document.getElementById('input-playlist').value.trim();
       if (!url) return showError('setup-error', 'Please paste a Spotify playlist URL.');
 
@@ -528,10 +581,9 @@
       showScreen('loading');
 
       try {
-        const res = await fetch(`/playlist?url=${encodeURIComponent(url)}`);
+        const res = await fetch(`/playlist?url=${encodeURIComponent(url)}&session_id=${sessionId}`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || 'Failed to load playlist.');
-
         allTracks = data.tracks;
         startGame();
       } catch (err) {
@@ -555,26 +607,20 @@
       isRevealed = false;
       const track = gameTracks[currentRound];
 
-      // Round badge & score
       document.getElementById('round-badge').textContent = `Round ${currentRound + 1} / ${totalRounds}`;
       document.getElementById('score-display').textContent = score;
-
-      // Album art
       document.getElementById('album-art').src = track.album_art || '';
       document.getElementById('art-blur').classList.remove('gone');
-
-      // Answer
       document.getElementById('answer-title').textContent = track.name;
       document.getElementById('answer-artist').textContent = track.artist;
-      const answerWrap = document.getElementById('answer-wrap');
-      answerWrap.classList.add('hidden');
-      answerWrap.classList.remove('revealed');
 
-      // Controls
+      const wrap = document.getElementById('answer-wrap');
+      wrap.classList.add('hidden');
+      wrap.classList.remove('revealed');
+
       document.getElementById('controls-hidden').style.display = 'grid';
       document.getElementById('controls-revealed').style.display = 'none';
 
-      // Audio
       loadAudio(track.preview_url);
     }
 
@@ -616,8 +662,7 @@
 
       audioTimer = setInterval(() => {
         const elapsed = audio.currentTime - start;
-        const pct = Math.min((elapsed / clipDuration) * 100, 100);
-        progressFill.style.width = pct + '%';
+        progressFill.style.width = Math.min((elapsed / clipDuration) * 100, 100) + '%';
         timerLabel.textContent = Math.min(Math.floor(elapsed), clipDuration) + 's';
 
         if (audio.currentTime >= end) {
@@ -633,7 +678,6 @@
     document.getElementById('btn-reveal').addEventListener('click', reveal);
     document.getElementById('btn-skip').addEventListener('click', () => {
       reveal();
-      // Treat skip as wrong
     });
 
     function reveal() {
@@ -642,20 +686,17 @@
       audio.pause();
       clearInterval(audioTimer);
 
-      // Unblur art
       document.getElementById('art-blur').classList.add('gone');
 
-      // Show answer
       const wrap = document.getElementById('answer-wrap');
       wrap.classList.remove('hidden');
       wrap.classList.add('revealed');
 
-      // Swap controls
       document.getElementById('controls-hidden').style.display = 'none';
       document.getElementById('controls-revealed').style.display = 'grid';
     }
 
-    // ── Score buttons ─────────────────────────────────────────────────────────
+    // ── Score ─────────────────────────────────────────────────────────────────
     document.getElementById('btn-correct').addEventListener('click', () => {
       score++;
       roundResults.push({ ...gameTracks[currentRound], got_it: true });
@@ -669,14 +710,10 @@
 
     function nextRound() {
       currentRound++;
-      if (currentRound >= totalRounds) {
-        endGame();
-      } else {
-        loadRound();
-      }
+      currentRound >= totalRounds ? endGame() : loadRound();
     }
 
-    // ── End game ──────────────────────────────────────────────────────────────
+    // ── End ───────────────────────────────────────────────────────────────────
     function endGame() {
       showScreen('scoreboard');
       document.getElementById('final-pts').textContent = `${score} / ${totalRounds}`;
@@ -685,22 +722,18 @@
         score >= totalRounds * 0.7 ? '🎉 Great round!' :
         score >= totalRounds * 0.4 ? '👍 Not bad!' : '😅 Keep practicing!';
 
-      // Track list recap
-      const list = document.getElementById('final-track-list');
-      list.innerHTML = roundResults.map(r => `
-        <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">
-          <span style="font-size:1.1rem">${r.got_it ? '✅' : '❌'}</span>
+      document.getElementById('final-track-list').innerHTML = roundResults.map(r => `
+        <div class="result-row">
+          <span class="result-icon">${r.got_it ? '✅' : '❌'}</span>
           <div>
-            <div style="font-weight:700;font-size:14px">${r.name}</div>
-            <div style="font-family:'Syne Mono',monospace;font-size:11px;color:var(--muted)">${r.artist}</div>
+            <div class="result-name">${r.name}</div>
+            <div class="result-artist">${r.artist}</div>
           </div>
         </div>
       `).join('');
     }
 
-    document.getElementById('btn-restart').addEventListener('click', () => {
-      showScreen('setup');
-    });
+    document.getElementById('btn-restart').addEventListener('click', () => showScreen('setup'));
 
     // ── Helpers ───────────────────────────────────────────────────────────────
     function shuffle(arr) {
@@ -716,6 +749,9 @@
       el.textContent = '⚠ ' + msg;
       el.style.display = 'block';
     }
+
+    // ── Start ─────────────────────────────────────────────────────────────────
+    init();
   </script>
 </body>
 </html>
