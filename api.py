@@ -43,7 +43,6 @@ def get_spotify_for_session(session_id: str) -> spotipy.Spotify:
 
     return spotipy.Spotify(auth=token_info["access_token"])
 
-
 def fetch_tracks(sp: spotipy.Spotify, playlist_url: str) -> list[dict]:
     playlist_id = playlist_url.split("/playlist/")[-1].split("?")[0]
     tracks = []
@@ -59,13 +58,13 @@ def fetch_tracks(sp: spotipy.Spotify, playlist_url: str) -> list[dict]:
 
         for item in results["items"]:
             track = item.get("track")
-            if not track or not track.get("preview_url"):
+            if not track or not track.get("uri"):  # only skip if no URI
                 continue
             tracks.append({
                 "name": track["name"],
                 "artist": track["artists"][0]["name"],
-                "uri": track["uri"],                    # ← add this
-                "duration_ms": track["duration_ms"],    # ← add this
+                "uri": track["uri"],
+                "duration_ms": track["duration_ms"],
                 "album_art": track["album"]["images"][0]["url"] if track["album"]["images"] else None,
             })
 
@@ -74,7 +73,7 @@ def fetch_tracks(sp: spotipy.Spotify, playlist_url: str) -> list[dict]:
         offset += 50
 
     if not tracks:
-        raise HTTPException(status_code=404, detail="No playable tracks found in this playlist.")
+        raise HTTPException(status_code=404, detail="No tracks found in this playlist.")
 
     return tracks
 
