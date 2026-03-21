@@ -23,15 +23,25 @@ def index():
     return FileResponse("static/index.html")
 
 
-@app.get("/playlist")
-def get_playlist(url: str):
-    """Fetch and return playable tracks from a Spotify playlist."""
-    try:
-        sp = get_spotify()
-        results = sp.playlist_tracks(url)
-        tracks = []
+def fetch_tracks(playlist_url: str) -> list[dict]:
+    sp = get_spotify()
+    
+    # Extract playlist ID from URL
+    playlist_id = playlist_url.split("/playlist/")[-1].split("?")[0]
+    
+    tracks = []
+    offset = 0
+    
+    while True:
+        results = sp.playlist_tracks(
+            playlist_id,
+            limit=50,
+            offset=offset,
+            fields="items(track(name,artists,preview_url,album(images))),next"
+        )
+        
         for item in results["items"]:
-            track = item["track"]
+            track = item.get("track")
             if not track or not track.get("preview_url"):
                 continue
             tracks.append({
@@ -40,14 +50,25 @@ def get_playlist(url: str):
                 "preview_url": track["preview_url"],
                 "album_art": track["album"]["images"][0]["url"] if track["album"]["images"] else None,
             })
-        if not tracks:
-            raise HTTPException(status_code=404, detail="No playable tracks found in this playlist.")
+        
+        if not results.get("next"):
+            break
+        offset += 50
+
+    if not tracks:
+        raise HTTPException(status_code=404, detail="No playable tracks found in this playlist.")
+    
+    return tracks
+
+@app.get("/playlist")
+def get_playlist(url: str):
+    try:
+        tracks = fetch_tracks(url)
         return {"tracks": tracks}
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-    
 
 import os
 
