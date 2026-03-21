@@ -13,8 +13,10 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 def get_spotify():
-    return spotipy.Spotify(auth_manager=SpotifyClientCredentials())
-
+    return spotipy.Spotify(auth_manager=SpotifyClientCredentials(
+        client_id=os.getenv("SPOTIPY_CLIENT_ID"),
+        client_secret=os.getenv("SPOTIPY_CLIENT_SECRET"),
+    ))
 
 @app.get("/")
 def index():
