@@ -18,7 +18,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # In-memory token store: session_id -> token_info
 sessions: dict[str, dict] = {}
 
-SCOPE = "playlist-read-private playlist-read-collaborative"
+SCOPE = "playlist-read-private playlist-read-collaborative streaming user-read-playback-state user-modify-playback-state user-read-email user-read-private"
 
 
 def get_oauth():
