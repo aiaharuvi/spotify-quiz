@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 
-load_dotenv(Path(__file__).parent / ".env")
+load_dotenv()
 
 app = FastAPI(title="SongDrop")
 app.mount("/static", StaticFiles(directory="static"), name="static")
