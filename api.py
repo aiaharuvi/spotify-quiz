@@ -54,7 +54,7 @@ def fetch_tracks(sp: spotipy.Spotify, playlist_url: str) -> list[dict]:
             playlist_id,
             limit=50,
             offset=offset,
-            fields="items(track(name,artists,preview_url,album(images))),next"
+            fields="items(track(name,artists,uri,duration_ms,album(images))),next"
         )
 
         for item in results["items"]:
@@ -64,7 +64,8 @@ def fetch_tracks(sp: spotipy.Spotify, playlist_url: str) -> list[dict]:
             tracks.append({
                 "name": track["name"],
                 "artist": track["artists"][0]["name"],
-                "preview_url": track["preview_url"],
+                "uri": track["uri"],                    # ← add this
+                "duration_ms": track["duration_ms"],    # ← add this
                 "album_art": track["album"]["images"][0]["url"] if track["album"]["images"] else None,
             })
 
@@ -77,7 +78,19 @@ def fetch_tracks(sp: spotipy.Spotify, playlist_url: str) -> list[dict]:
 
     return tracks
 
-
+@app.get("/me")
+def get_me(session_id: str):
+    sp = get_spotify_for_session(session_id)
+    try:
+        user = sp.me()
+        token_info = sessions.get(session_id)
+        return {
+            "name": user["display_name"],
+            "logged_in": True,
+            "access_token": token_info["access_token"],  # ← add this
+        }
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=str(e))
 # ── Routes ────────────────────────────────────────────────────────────────────
 
 @app.get("/")

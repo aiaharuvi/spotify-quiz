@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SongDrop 🎵</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Syne+Mono&display=swap" rel="stylesheet" />
+  <script src="https://sdk.scdn.co/spotify-player.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -145,6 +146,7 @@
       transition: transform 0.1s, box-shadow 0.1s;
       width: 100%;
       text-decoration: none;
+      border: 2px solid var(--ink);
     }
 
     .btn:active { transform: translate(3px,3px); box-shadow: 1px 1px 0 var(--ink); }
@@ -154,7 +156,7 @@
     .btn-dark     { background: var(--ink); color: #fff; }
     .btn-ghost    { background: transparent; color: var(--ink); }
     .btn-green    { background: var(--accent2); color: #fff; }
-    .btn-spotify  { background: var(--spotify); color: #fff; }
+    .btn-spotify  { background: var(--spotify); color: #fff; border-color: var(--spotify); }
 
     .btn-row {
       display: grid;
@@ -163,7 +165,6 @@
       margin-top: 12px;
     }
 
-    /* User bar */
     .user-bar {
       display: flex;
       align-items: center;
@@ -184,8 +185,32 @@
       cursor: pointer;
       text-decoration: underline;
     }
-
     .user-bar .logout:hover { color: var(--accent); }
+
+    /* SDK status */
+    .sdk-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border: 2px solid var(--ink);
+      border-radius: var(--radius);
+      background: var(--bg);
+      margin-bottom: 18px;
+      font-family: 'Syne Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .sdk-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .sdk-dot.ready { background: var(--spotify); }
+    .sdk-dot.error { background: var(--accent); }
 
     /* Album art */
     .art-wrap {
@@ -240,6 +265,7 @@
     }
 
     .play-btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--ink); }
+    .play-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
     .progress-wrap {
       flex: 1; height: 8px;
@@ -289,7 +315,6 @@
     .song-title  { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
     .song-artist { font-family: 'Syne Mono', monospace; font-size: 13px; }
 
-    /* Round badge + score */
     .game-header {
       display: flex;
       align-items: center;
@@ -318,7 +343,7 @@
 
     .score-pill span { color: var(--accent); font-weight: 800; }
 
-    /* Scoreboard */
+    /* Results */
     .result-row {
       display: flex;
       align-items: center;
@@ -328,11 +353,9 @@
     }
 
     .result-row:last-child { border-bottom: none; }
-    .result-icon { font-size: 1.1rem; flex-shrink: 0; }
     .result-name { font-weight: 700; font-size: 14px; }
     .result-artist { font-family: 'Syne Mono', monospace; font-size: 11px; color: var(--muted); }
 
-    /* Error */
     .error-msg {
       display: none;
       background: #fff0ee;
@@ -345,7 +368,6 @@
       margin-bottom: 14px;
     }
 
-    /* Loading */
     .loading-bar {
       width: 100%; height: 3px;
       background: var(--border);
@@ -377,7 +399,7 @@
 </head>
 <body>
 
-  <!-- ── LOGIN SCREEN ── -->
+  <!-- LOGIN -->
   <div class="screen active" id="screen-login">
     <div class="card">
       <p class="logo">SongDrop</p>
@@ -390,13 +412,19 @@
     </div>
   </div>
 
-  <!-- ── SETUP SCREEN ── -->
+  <!-- SETUP -->
   <div class="screen" id="screen-setup">
     <div class="card">
       <p class="logo">SongDrop</p>
       <div class="user-bar">
         <span>👋 Hey, <span class="name" id="user-name">...</span></span>
         <span class="logout" id="btn-logout">Log out</span>
+      </div>
+
+      <!-- SDK status indicator -->
+      <div class="sdk-status">
+        <div class="sdk-dot" id="sdk-dot"></div>
+        <span id="sdk-status-text">Connecting to Spotify player...</span>
       </div>
 
       <div class="error-msg" id="setup-error"></div>
@@ -431,11 +459,11 @@
         <option value="random">Random snippet</option>
       </select>
 
-      <button class="btn btn-primary" id="btn-load">Load Playlist →</button>
+      <button class="btn btn-primary" id="btn-load" disabled>Load Playlist →</button>
     </div>
   </div>
 
-  <!-- ── LOADING SCREEN ── -->
+  <!-- LOADING -->
   <div class="screen" id="screen-loading">
     <div class="card">
       <p class="logo">SongDrop</p>
@@ -444,7 +472,7 @@
     </div>
   </div>
 
-  <!-- ── GAME SCREEN ── -->
+  <!-- GAME -->
   <div class="screen" id="screen-game">
     <div class="card">
       <div class="game-header">
@@ -458,7 +486,7 @@
       </div>
 
       <div class="player-row">
-        <button class="play-btn" id="play-btn">▶</button>
+        <button class="play-btn" id="play-btn" disabled>▶</button>
         <div class="progress-wrap">
           <div class="progress-fill" id="progress-fill"></div>
         </div>
@@ -482,7 +510,7 @@
     </div>
   </div>
 
-  <!-- ── SCOREBOARD SCREEN ── -->
+  <!-- SCOREBOARD -->
   <div class="screen" id="screen-scoreboard">
     <div class="card">
       <p class="logo">Game Over</p>
@@ -497,11 +525,14 @@
     </div>
   </div>
 
-  <audio id="audio"></audio>
-
   <script>
     // ── State ─────────────────────────────────────────────────────────────────
     let sessionId = null;
+    let accessToken = null;
+    let deviceId = null;
+    let player = null;
+    let playerReady = false;
+
     let allTracks = [];
     let gameTracks = [];
     let currentRound = 0;
@@ -509,36 +540,76 @@
     let score = 0;
     let clipDuration = 5;
     let clipMode = 'beginning';
-    let audioTimer = null;
+    let clipTimer = null;
     let isRevealed = false;
+    let isPlaying = false;
     let roundResults = [];
 
-    const audio = document.getElementById('audio');
-    const playBtn = document.getElementById('play-btn');
-    const progressFill = document.getElementById('progress-fill');
-    const timerLabel = document.getElementById('timer-label');
+    // ── Spotify SDK callback ──────────────────────────────────────────────────
+    window.onSpotifyWebPlaybackSDKReady = () => {
+      if (!accessToken) return;
+      initPlayer();
+    };
+
+    function initPlayer() {
+      player = new Spotify.Player({
+        name: 'SongDrop',
+        getOAuthToken: cb => cb(accessToken),
+        volume: 0.8,
+      });
+
+      player.addListener('ready', ({ device_id }) => {
+        deviceId = device_id;
+        playerReady = true;
+        setSDKStatus('ready', '🎵 Player ready');
+        document.getElementById('btn-load').disabled = false;
+        document.getElementById('play-btn').disabled = false;
+      });
+
+      player.addListener('not_ready', () => {
+        playerReady = false;
+        setSDKStatus('error', 'Player disconnected');
+      });
+
+      player.addListener('initialization_error', ({ message }) => {
+        setSDKStatus('error', 'Init error: ' + message);
+      });
+
+      player.addListener('authentication_error', ({ message }) => {
+        setSDKStatus('error', 'Auth error — try logging out and back in');
+      });
+
+      player.addListener('account_error', () => {
+        setSDKStatus('error', 'Spotify Premium required for playback');
+      });
+
+      player.connect();
+    }
+
+    function setSDKStatus(state, text) {
+      const dot = document.getElementById('sdk-dot');
+      const label = document.getElementById('sdk-status-text');
+      dot.className = 'sdk-dot ' + state;
+      label.textContent = text;
+    }
 
     // ── Init ──────────────────────────────────────────────────────────────────
     async function init() {
-      // Check for session in URL
       const params = new URLSearchParams(window.location.search);
       const sid = params.get('session');
 
       if (sid) {
-        // Clean up URL
         window.history.replaceState({}, '', '/');
         sessionId = sid;
         localStorage.setItem('session_id', sid);
+      } else {
+        sessionId = localStorage.getItem('session_id');
+      }
+
+      if (sessionId) {
         await loadUser();
       } else {
-        // Check localStorage
-        const stored = localStorage.getItem('session_id');
-        if (stored) {
-          sessionId = stored;
-          await loadUser();
-        } else {
-          showScreen('login');
-        }
+        showScreen('login');
       }
     }
 
@@ -548,7 +619,14 @@
         if (!res.ok) throw new Error('Session expired');
         const data = await res.json();
         document.getElementById('user-name').textContent = data.name;
+        accessToken = data.access_token;
         showScreen('setup');
+
+        // Init SDK if already loaded
+        if (window.Spotify) {
+          initPlayer();
+        }
+        // Otherwise onSpotifyWebPlaybackSDKReady will fire and call initPlayer
       } catch {
         localStorage.removeItem('session_id');
         sessionId = null;
@@ -556,7 +634,7 @@
       }
     }
 
-    // ── Screen ────────────────────────────────────────────────────────────────
+    // ── Screens ───────────────────────────────────────────────────────────────
     function showScreen(id) {
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.getElementById('screen-' + id).classList.add('active');
@@ -564,8 +642,10 @@
 
     // ── Logout ────────────────────────────────────────────────────────────────
     document.getElementById('btn-logout').addEventListener('click', () => {
+      if (player) player.disconnect();
       localStorage.removeItem('session_id');
       sessionId = null;
+      playerReady = false;
       showScreen('login');
     });
 
@@ -605,6 +685,9 @@
 
     function loadRound() {
       isRevealed = false;
+      isPlaying = false;
+      clearInterval(clipTimer);
+
       const track = gameTracks[currentRound];
 
       document.getElementById('round-badge').textContent = `Round ${currentRound + 1} / ${totalRounds}`;
@@ -621,70 +704,89 @@
       document.getElementById('controls-hidden').style.display = 'grid';
       document.getElementById('controls-revealed').style.display = 'none';
 
-      loadAudio(track.preview_url);
+      document.getElementById('play-btn').textContent = '▶';
+      document.getElementById('progress-fill').style.width = '0%';
+      document.getElementById('timer-label').textContent = '0s';
     }
 
-    // ── Audio ─────────────────────────────────────────────────────────────────
-    function loadAudio(url) {
-      clearInterval(audioTimer);
-      audio.src = url;
-      audio.load();
-      progressFill.style.width = '0%';
-      timerLabel.textContent = '0s';
-      playBtn.textContent = '▶';
+    // ── Playback ──────────────────────────────────────────────────────────────
+    document.getElementById('play-btn').addEventListener('click', async () => {
+      if (!playerReady) return showError('setup-error', 'Player not ready yet.');
 
-      audio.oncanplaythrough = () => {
-        if (clipMode === 'random') {
-          const max = Math.max(0, audio.duration - clipDuration - 1);
-          audio.currentTime = Math.random() * max;
-        } else {
-          audio.currentTime = 0;
-        }
-      };
-    }
+      if (isPlaying) {
+        await player.pause();
+        isPlaying = false;
+        document.getElementById('play-btn').textContent = '▶';
+        clearInterval(clipTimer);
+        return;
+      }
 
-    playBtn.addEventListener('click', () => {
-      if (audio.paused) {
-        audio.play();
-        playBtn.textContent = '⏸';
-        startTimer();
-      } else {
-        audio.pause();
-        playBtn.textContent = '▶';
-        clearInterval(audioTimer);
+      const track = gameTracks[currentRound];
+      const uri = track.uri;
+
+      // Calculate start position
+      let positionMs = 0;
+      if (clipMode === 'random') {
+        const durationMs = track.duration_ms;
+        const maxStart = Math.max(0, durationMs - (clipDuration * 1000) - 2000);
+        positionMs = Math.floor(Math.random() * maxStart);
+      }
+
+      try {
+        // Tell Spotify to play this track on our device
+        await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            uris: [uri],
+            position_ms: positionMs,
+          }),
+        });
+
+        isPlaying = true;
+        document.getElementById('play-btn').textContent = '⏸';
+        startClipTimer(positionMs);
+      } catch (err) {
+        showError('setup-error', 'Playback error: ' + err.message);
       }
     });
 
-    function startTimer() {
-      clearInterval(audioTimer);
-      const start = audio.currentTime;
-      const end = start + clipDuration;
+    function startClipTimer(startMs) {
+      clearInterval(clipTimer);
+      const endMs = startMs + (clipDuration * 1000);
+      const startTime = Date.now();
 
-      audioTimer = setInterval(() => {
-        const elapsed = audio.currentTime - start;
-        progressFill.style.width = Math.min((elapsed / clipDuration) * 100, 100) + '%';
-        timerLabel.textContent = Math.min(Math.floor(elapsed), clipDuration) + 's';
+      clipTimer = setInterval(async () => {
+        const elapsed = Date.now() - startTime;
+        const pct = Math.min((elapsed / (clipDuration * 1000)) * 100, 100);
+        document.getElementById('progress-fill').style.width = pct + '%';
+        document.getElementById('timer-label').textContent = Math.min(Math.floor(elapsed / 1000), clipDuration) + 's';
 
-        if (audio.currentTime >= end) {
-          audio.pause();
-          playBtn.textContent = '▶';
-          clearInterval(audioTimer);
-          progressFill.style.width = '100%';
+        if (elapsed >= clipDuration * 1000) {
+          clearInterval(clipTimer);
+          await player.pause();
+          isPlaying = false;
+          document.getElementById('play-btn').textContent = '▶';
+          document.getElementById('progress-fill').style.width = '100%';
         }
       }, 100);
     }
 
     // ── Reveal ────────────────────────────────────────────────────────────────
     document.getElementById('btn-reveal').addEventListener('click', reveal);
-    document.getElementById('btn-skip').addEventListener('click', () => {
-      reveal();
-    });
+    document.getElementById('btn-skip').addEventListener('click', reveal);
 
-    function reveal() {
+    async function reveal() {
       if (isRevealed) return;
       isRevealed = true;
-      audio.pause();
-      clearInterval(audioTimer);
+      clearInterval(clipTimer);
+      if (isPlaying) {
+        await player.pause();
+        isPlaying = false;
+      }
 
       document.getElementById('art-blur').classList.add('gone');
 
@@ -724,7 +826,7 @@
 
       document.getElementById('final-track-list').innerHTML = roundResults.map(r => `
         <div class="result-row">
-          <span class="result-icon">${r.got_it ? '✅' : '❌'}</span>
+          <span style="font-size:1.1rem">${r.got_it ? '✅' : '❌'}</span>
           <div>
             <div class="result-name">${r.name}</div>
             <div class="result-artist">${r.artist}</div>
@@ -750,7 +852,6 @@
       el.style.display = 'block';
     }
 
-    // ── Start ─────────────────────────────────────────────────────────────────
     init();
   </script>
 </body>
