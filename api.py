@@ -45,3 +45,14 @@ def get_playlist(url: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+    
+
+import os
+
+@app.get("/debug-env")
+def debug_env():
+    return {
+        "client_id_set": bool(os.getenv("SPOTIPY_CLIENT_ID")),
+        "client_secret_set": bool(os.getenv("SPOTIPY_CLIENT_SECRET")),
+        "client_id_preview": os.getenv("SPOTIPY_CLIENT_ID", "")[:4] + "...",
+    }
