@@ -53,12 +53,11 @@ def fetch_tracks(sp: spotipy.Spotify, playlist_url: str) -> list[dict]:
             playlist_id,
             limit=50,
             offset=offset,
-            fields="items(track(name,artists,uri,duration_ms,album(images))),next"
         )
 
         for item in results["items"]:
             track = item.get("track")
-            if not track or not track.get("uri"):  # only skip if no URI
+            if not track or not track.get("uri"):
                 continue
             tracks.append({
                 "name": track["name"],
@@ -68,7 +67,8 @@ def fetch_tracks(sp: spotipy.Spotify, playlist_url: str) -> list[dict]:
                 "album_art": track["album"]["images"][0]["url"] if track["album"]["images"] else None,
             })
 
-        if not results.get("next"):
+        # Correct pagination check
+        if results["next"] is None:
             break
         offset += 50
 
@@ -76,7 +76,6 @@ def fetch_tracks(sp: spotipy.Spotify, playlist_url: str) -> list[dict]:
         raise HTTPException(status_code=404, detail="No tracks found in this playlist.")
 
     return tracks
-
 @app.get("/me")
 def get_me(session_id: str):
     sp = get_spotify_for_session(session_id)
