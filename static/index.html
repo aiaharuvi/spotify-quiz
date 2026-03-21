@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SongDrop 🎵</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Syne+Mono&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f0e8;
+      --ink: #1a1a1a;
+      --card: #ffffff;
+      --accent: #ff3b00;
+      --accent2: #00c2a8;
+      --muted: #888;
+      --border: #e0dbd0;
+      --radius: 3px;
+      --shadow: 4px 4px 0px var(--ink);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    .screen {
+      display: none;
+      width: 100%;
+      max-width: 560px;
+      position: relative;
+      z-index: 1;
+      animation: fadeUp 0.25s ease;
+    }
+
+    .screen.active { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card);
+      border: 2px solid var(--ink);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 32px;
+      margin-bottom: 16px;
+    }
+
+    /* ── Type ── */
+    .logo {
+      font-size: 11px;
+      font-family: 'Syne Mono', monospace;
+      letter-spacing: 0.25em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-size: clamp(3rem, 10vw, 5rem);
+      font-weight: 800;
+      line-height: 0.95;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 20px;
+    }
+
+    .subtitle {
+      font-family: 'Syne Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+
+    /* ── Form ── */
+    label {
+      display: block;
+      font-family: 'Syne Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 11px 14px;
+      border: 2px solid var(--ink);
+      border-radius: var(--radius);
+      font-family: 'Syne Mono', monospace;
+      font-size: 13px;
+      background: var(--bg);
+      color: var(--ink);
+      margin-bottom: 18px;
+      outline: none;
+      transition: box-shadow 0.15s;
+    }
+
+    input:focus, select:focus {
+      box-shadow: 3px 3px 0 var(--accent);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 13px 24px;
+      border: 2px solid var(--ink);
+      border-radius: var(--radius);
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: transform 0.1s, box-shadow 0.1s;
+      width: 100%;
+    }
+
+    .btn:active { transform: translate(3px,3px); box-shadow: 1px 1px 0 var(--ink); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: var(--shadow); }
+
+    .btn-primary  { background: var(--accent); color: #fff; }
+    .btn-dark     { background: var(--ink); color: #fff; }
+    .btn-ghost    { background: transparent; color: var(--ink); }
+    .btn-green    { background: var(--accent2); color: #fff; }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    /* ── Album art ── */
+    .art-wrap {
+      width: 100%;
+      aspect-ratio: 1;
+      border: 2px solid var(--ink);
+      border-radius: var(--radius);
+      overflow: hidden;
+      position: relative;
+      background: var(--ink);
+      margin-bottom: 20px;
+    }
+
+    .art-wrap img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .art-blur {
+      position: absolute;
+      inset: 0;
+      backdrop-filter: blur(48px);
+      background: rgba(0,0,0,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 72px;
+      transition: opacity 0.6s;
+    }
+
+    .art-blur.gone { opacity: 0; pointer-events: none; }
+
+    /* ── Player ── */
+    .player-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .play-btn {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      border: 2px solid var(--ink);
+      background: var(--accent);
+      color: #fff;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 3px 3px 0 var(--ink);
+      flex-shrink: 0;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+
+    .play-btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--ink); }
+
+    .progress-wrap {
+      flex: 1;
+      height: 8px;
+      background: var(--border);
+      border: 2px solid var(--ink);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.1s linear;
+    }
+
+    .timer-label {
+      font-family: 'Syne Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+      flex-shrink: 0;
+      min-width: 28px;
+      text-align: right;
+    }
+
+    /* ── Answer card ── */
+    .answer-wrap {
+      border: 2px solid var(--ink);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 16px;
+      transition: background 0.3s, border-style 0.3s;
+    }
+
+    .answer-wrap.hidden {
+      background: var(--border);
+      border-style: dashed;
+    }
+
+    .answer-wrap.hidden .song-title,
+    .answer-wrap.hidden .song-artist { color: var(--border); user-select: none; }
+
+    .answer-wrap.revealed { background: var(--ink); color: #fff; }
+    .answer-wrap.revealed .song-artist { color: #888; }
+
+    .song-title  { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
+    .song-artist { font-family: 'Syne Mono', monospace; font-size: 13px; }
+
+    /* ── Round badge ── */
+    .round-badge {
+      display: inline-block;
+      font-family: 'Syne Mono', monospace;
+      font-size: 11px;
+      padding: 4px 12px;
+      border: 2px solid var(--ink);
+      border-radius: 99px;
+      background: var(--bg);
+      margin-bottom: 18px;
+    }
+
+    /* ── Scoreboard ── */
+    .podium-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .podium-row:last-child { border-bottom: none; }
+
+    .medal { font-size: 1.8rem; width: 40px; text-align: center; flex-shrink: 0; }
+    .podium-name { font-size: 1rem; font-weight: 700; flex: 1; }
+    .podium-pts {
+      font-family: 'Syne Mono', monospace;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    /* ── Score display ── */
+    .score-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      padding: 10px 16px;
+      border: 2px solid var(--ink);
+      border-radius: var(--radius);
+      background: var(--bg);
+    }
+
+    .score-label {
+      font-family: 'Syne Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .score-value {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    /* ── Error ── */
+    .error-msg {
+      display: none;
+      background: #fff0ee;
+      border: 2px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      font-family: 'Syne Mono', monospace;
+      font-size: 12px;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+
+    /* ── Loading ── */
+    .loading-bar {
+      width: 100%;
+      height: 3px;
+      background: var(--border);
+      margin-bottom: 20px;
+      overflow: hidden;
+      border-radius: 99px;
+    }
+
+    .loading-bar::after {
+      content: '';
+      display: block;
+      width: 40%;
+      height: 100%;
+      background: var(--accent);
+      animation: slide 1s ease-in-out infinite;
+    }
+
+    @keyframes slide {
+      0%   { transform: translateX(-100%); }
+      100% { transform: translateX(350%); }
+    }
+
+    .divider { height: 2px; background: var(--border); margin: 20px 0; }
+
+    @media (max-width: 480px) {
+      .form-row { grid-template-columns: 1fr; }
+      .btn-row  { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── SETUP SCREEN ── -->
+  <div class="screen active" id="screen-setup">
+    <div class="card">
+      <p class="logo">SongDrop</p>
+      <h1>Name<br>That<br>Track.</h1>
+      <p class="subtitle">// paste a playlist. guess the song.</p>
+
+      <div class="error-msg" id="setup-error"></div>
+
+      <label>Spotify Playlist URL</label>
+      <input id="input-playlist" type="text" placeholder="https://open.spotify.com/playlist/..." />
+
+      <div class="form-row">
+        <div>
+          <label>Rounds</label>
+          <select id="input-rounds">
+            <option value="5">5 rounds</option>
+            <option value="10" selected>10 rounds</option>
+            <option value="15">15 rounds</option>
+            <option value="20">20 rounds</option>
+          </select>
+        </div>
+        <div>
+          <label>Clip Duration</label>
+          <select id="input-duration">
+            <option value="3">3 seconds</option>
+            <option value="5" selected>5 seconds</option>
+            <option value="10">10 seconds</option>
+            <option value="15">15 seconds</option>
+          </select>
+        </div>
+      </div>
+
+      <label>Clip Mode</label>
+      <select id="input-mode">
+        <option value="beginning">From the beginning</option>
+        <option value="random">Random snippet</option>
+      </select>
+
+      <button class="btn btn-primary" id="btn-start">Load Playlist →</button>
+    </div>
+  </div>
+
+  <!-- ── LOADING SCREEN ── -->
+  <div class="screen" id="screen-loading">
+    <div class="card">
+      <p class="logo">SongDrop</p>
+      <p style="font-size:13px;font-family:'Syne Mono',monospace;color:var(--muted);margin-bottom:20px;">Fetching tracks...</p>
+      <div class="loading-bar"></div>
+    </div>
+  </div>
+
+  <!-- ── GAME SCREEN ── -->
+  <div class="screen" id="screen-game">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+        <div class="round-badge" id="round-badge">Round 1 / 10</div>
+        <div class="score-bar" style="margin:0;padding:6px 14px;">
+          <span class="score-label">Score&nbsp;</span>
+          <span class="score-value" id="score-display">0</span>
+        </div>
+      </div>
+
+      <div class="art-wrap">
+        <img id="album-art" src="" alt="" />
+        <div class="art-blur" id="art-blur">🎵</div>
+      </div>
+
+      <div class="player-row">
+        <button class="play-btn" id="play-btn">▶</button>
+        <div class="progress-wrap">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <span class="timer-label" id="timer-label">0s</span>
+      </div>
+
+      <div class="answer-wrap hidden" id="answer-wrap">
+        <div class="song-title" id="answer-title">Song Title</div>
+        <div class="song-artist" id="answer-artist">Artist Name</div>
+      </div>
+
+      <div class="btn-row" id="controls-hidden">
+        <button class="btn btn-primary" id="btn-reveal">👁 Reveal</button>
+        <button class="btn btn-ghost" id="btn-skip">Skip →</button>
+      </div>
+
+      <div class="btn-row" id="controls-revealed" style="display:none">
+        <button class="btn btn-green" id="btn-correct">✓ Got it! +1</button>
+        <button class="btn btn-ghost" id="btn-wrong">✗ Nope</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCOREBOARD SCREEN ── -->
+  <div class="screen" id="screen-scoreboard">
+    <div class="card">
+      <p class="logo">Game Over</p>
+      <h2>Final Score 🏆</h2>
+      <div id="final-score-display" style="text-align:center;padding:20px 0;">
+        <div style="font-size:4rem;font-weight:800;color:var(--accent);" id="final-pts"></div>
+        <div style="font-family:'Syne Mono',monospace;font-size:13px;color:var(--muted);margin-top:4px;" id="final-sub"></div>
+      </div>
+      <div class="divider"></div>
+      <div id="final-track-list" style="margin-bottom:20px;"></div>
+      <button class="btn btn-primary" id="btn-restart">Play Again →</button>
+    </div>
+  </div>
+
+  <audio id="audio"></audio>
+
+  <script>
+    // ── State ─────────────────────────────────────────────────────────────────
+    let allTracks = [];
+    let gameTracks = [];
+    let currentRound = 0;
+    let totalRounds = 10;
+    let score = 0;
+    let clipDuration = 5;
+    let clipMode = 'beginning';
+    let audioTimer = null;
+    let isRevealed = false;
+    let roundResults = []; // {name, artist, got_it}
+
+    const audio = document.getElementById('audio');
+    const playBtn = document.getElementById('play-btn');
+    const progressFill = document.getElementById('progress-fill');
+    const timerLabel = document.getElementById('timer-label');
+
+    // ── Screen switching ──────────────────────────────────────────────────────
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('screen-' + id).classList.add('active');
+    }
+
+    // ── Setup ─────────────────────────────────────────────────────────────────
+    document.getElementById('btn-start').addEventListener('click', async () => {
+      const url = document.getElementById('input-playlist').value.trim();
+      if (!url) return showError('setup-error', 'Please paste a Spotify playlist URL.');
+
+      totalRounds = parseInt(document.getElementById('input-rounds').value);
+      clipDuration = parseInt(document.getElementById('input-duration').value);
+      clipMode = document.getElementById('input-mode').value;
+
+      showScreen('loading');
+
+      try {
+        const res = await fetch(`/playlist?url=${encodeURIComponent(url)}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Failed to load playlist.');
+
+        allTracks = data.tracks;
+        startGame();
+      } catch (err) {
+        showScreen('setup');
+        showError('setup-error', err.message);
+      }
+    });
+
+    // ── Game ──────────────────────────────────────────────────────────────────
+    function startGame() {
+      gameTracks = shuffle([...allTracks]).slice(0, totalRounds);
+      totalRounds = gameTracks.length;
+      currentRound = 0;
+      score = 0;
+      roundResults = [];
+      showScreen('game');
+      loadRound();
+    }
+
+    function loadRound() {
+      isRevealed = false;
+      const track = gameTracks[currentRound];
+
+      // Round badge & score
+      document.getElementById('round-badge').textContent = `Round ${currentRound + 1} / ${totalRounds}`;
+      document.getElementById('score-display').textContent = score;
+
+      // Album art
+      document.getElementById('album-art').src = track.album_art || '';
+      document.getElementById('art-blur').classList.remove('gone');
+
+      // Answer
+      document.getElementById('answer-title').textContent = track.name;
+      document.getElementById('answer-artist').textContent = track.artist;
+      const answerWrap = document.getElementById('answer-wrap');
+      answerWrap.classList.add('hidden');
+      answerWrap.classList.remove('revealed');
+
+      // Controls
+      document.getElementById('controls-hidden').style.display = 'grid';
+      document.getElementById('controls-revealed').style.display = 'none';
+
+      // Audio
+      loadAudio(track.preview_url);
+    }
+
+    // ── Audio ─────────────────────────────────────────────────────────────────
+    function loadAudio(url) {
+      clearInterval(audioTimer);
+      audio.src = url;
+      audio.load();
+      progressFill.style.width = '0%';
+      timerLabel.textContent = '0s';
+      playBtn.textContent = '▶';
+
+      audio.oncanplaythrough = () => {
+        if (clipMode === 'random') {
+          const max = Math.max(0, audio.duration - clipDuration - 1);
+          audio.currentTime = Math.random() * max;
+        } else {
+          audio.currentTime = 0;
+        }
+      };
+    }
+
+    playBtn.addEventListener('click', () => {
+      if (audio.paused) {
+        audio.play();
+        playBtn.textContent = '⏸';
+        startTimer();
+      } else {
+        audio.pause();
+        playBtn.textContent = '▶';
+        clearInterval(audioTimer);
+      }
+    });
+
+    function startTimer() {
+      clearInterval(audioTimer);
+      const start = audio.currentTime;
+      const end = start + clipDuration;
+
+      audioTimer = setInterval(() => {
+        const elapsed = audio.currentTime - start;
+        const pct = Math.min((elapsed / clipDuration) * 100, 100);
+        progressFill.style.width = pct + '%';
+        timerLabel.textContent = Math.min(Math.floor(elapsed), clipDuration) + 's';
+
+        if (audio.currentTime >= end) {
+          audio.pause();
+          playBtn.textContent = '▶';
+          clearInterval(audioTimer);
+          progressFill.style.width = '100%';
+        }
+      }, 100);
+    }
+
+    // ── Reveal ────────────────────────────────────────────────────────────────
+    document.getElementById('btn-reveal').addEventListener('click', reveal);
+    document.getElementById('btn-skip').addEventListener('click', () => {
+      reveal();
+      // Treat skip as wrong
+    });
+
+    function reveal() {
+      if (isRevealed) return;
+      isRevealed = true;
+      audio.pause();
+      clearInterval(audioTimer);
+
+      // Unblur art
+      document.getElementById('art-blur').classList.add('gone');
+
+      // Show answer
+      const wrap = document.getElementById('answer-wrap');
+      wrap.classList.remove('hidden');
+      wrap.classList.add('revealed');
+
+      // Swap controls
+      document.getElementById('controls-hidden').style.display = 'none';
+      document.getElementById('controls-revealed').style.display = 'grid';
+    }
+
+    // ── Score buttons ─────────────────────────────────────────────────────────
+    document.getElementById('btn-correct').addEventListener('click', () => {
+      score++;
+      roundResults.push({ ...gameTracks[currentRound], got_it: true });
+      nextRound();
+    });
+
+    document.getElementById('btn-wrong').addEventListener('click', () => {
+      roundResults.push({ ...gameTracks[currentRound], got_it: false });
+      nextRound();
+    });
+
+    function nextRound() {
+      currentRound++;
+      if (currentRound >= totalRounds) {
+        endGame();
+      } else {
+        loadRound();
+      }
+    }
+
+    // ── End game ──────────────────────────────────────────────────────────────
+    function endGame() {
+      showScreen('scoreboard');
+      document.getElementById('final-pts').textContent = `${score} / ${totalRounds}`;
+      document.getElementById('final-sub').textContent =
+        score === totalRounds ? '🔥 Perfect score!' :
+        score >= totalRounds * 0.7 ? '🎉 Great round!' :
+        score >= totalRounds * 0.4 ? '👍 Not bad!' : '😅 Keep practicing!';
+
+      // Track list recap
+      const list = document.getElementById('final-track-list');
+      list.innerHTML = roundResults.map(r => `
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">
+          <span style="font-size:1.1rem">${r.got_it ? '✅' : '❌'}</span>
+          <div>
+            <div style="font-weight:700;font-size:14px">${r.name}</div>
+            <div style="font-family:'Syne Mono',monospace;font-size:11px;color:var(--muted)">${r.artist}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('btn-restart').addEventListener('click', () => {
+      showScreen('setup');
+    });
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function showError(id, msg) {
+      const el = document.getElementById(id);
+      el.textContent = '⚠ ' + msg;
+      el.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

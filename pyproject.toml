@@ -1,0 +1,14 @@
+[project]
+name = "spotify-quiz"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "fastapi>=0.124.4",
+    "python-dotenv>=1.0.1",
+    "python-multipart>=0.0.20",
+    "spotipy>=2.23.0",
+    "uvicorn>=0.33.0",
+    "websockets>=13.1",
+]
