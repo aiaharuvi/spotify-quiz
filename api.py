@@ -58,3 +58,13 @@ def debug_env():
         "client_secret_set": bool(os.getenv("SPOTIPY_CLIENT_SECRET")),
         "client_id_preview": os.getenv("SPOTIPY_CLIENT_ID", "")[:4] + "...",
     }
+
+@app.get("/debug-spotify")
+def debug_spotify():
+    try:
+        sp = get_spotify()
+        # Try a simple search instead of playlist
+        results = sp.search(q="test", type="track", limit=1)
+        return {"status": "ok", "track": results["tracks"]["items"][0]["name"]}
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}
