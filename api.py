@@ -89,3 +89,13 @@ def debug_spotify():
         return {"status": "ok", "track": results["tracks"]["items"][0]["name"]}
     except Exception as e:
         return {"status": "error", "detail": str(e)}
+    
+@app.get("/debug-playlist")
+def debug_playlist(url: str):
+    try:
+        sp = get_spotify()
+        playlist_id = url.split("/playlist/")[-1].split("?")[0]
+        result = sp.playlist(playlist_id, fields="name,tracks.total")
+        return {"status": "ok", "name": result["name"], "total": result["tracks"]["total"]}
+    except Exception as e:
+        return {"status": "error", "detail": str(e), "type": type(e).__name__}
