@@ -4,28 +4,29 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SongDrop 🎵</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Syne+Mono&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
   <script src="https://sdk.scdn.co/spotify-player.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #f5f0e8;
-      --ink: #1a1a1a;
+      --bg: #F0EEFF;
+      --ink: #1E1B4B;
       --card: #ffffff;
-      --accent: #ff3b00;
-      --accent2: #00c2a8;
+      --accent: #7C3AED;
+      --accent2: #0EA5E9;
       --spotify: #1DB954;
-      --muted: #888;
-      --border: #e0dbd0;
-      --radius: 3px;
+      --muted: #7C7A9E;
+      --border: #DDD6FE;
+      --radius: 6px;
       --shadow: 4px 4px 0px var(--ink);
     }
 
     body {
       background: var(--bg);
       color: var(--ink);
-      font-family: 'Syne', sans-serif;
+      font-family: 'Outfit', sans-serif;
+      font-size: 17px;
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -72,8 +73,8 @@
     }
 
     .logo {
-      font-size: 11px;
-      font-family: 'Syne Mono', monospace;
+      font-size: 13px;
+      font-family: 'Space Mono', monospace;
       letter-spacing: 0.25em;
       color: var(--accent);
       text-transform: uppercase;
@@ -81,25 +82,25 @@
     }
 
     h1 {
-      font-size: clamp(3rem, 10vw, 5rem);
+      font-size: clamp(4.5rem, 14vw, 7rem);
       font-weight: 800;
-      line-height: 0.95;
-      margin-bottom: 10px;
+      line-height: 0.9;
+      margin-bottom: 12px;
     }
 
-    h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; }
+    h2 { font-size: 2rem; font-weight: 800; margin-bottom: 20px; }
 
     .subtitle {
-      font-family: 'Syne Mono', monospace;
-      font-size: 12px;
+      font-family: 'Space Mono', monospace;
+      font-size: 14px;
       color: var(--muted);
       margin-bottom: 32px;
     }
 
     label {
       display: block;
-      font-family: 'Syne Mono', monospace;
-      font-size: 10px;
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
       letter-spacing: 0.2em;
       text-transform: uppercase;
       color: var(--muted);
@@ -108,11 +109,11 @@
 
     input, select {
       width: 100%;
-      padding: 11px 14px;
+      padding: 13px 16px;
       border: 2px solid var(--ink);
       border-radius: var(--radius);
-      font-family: 'Syne Mono', monospace;
-      font-size: 13px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
       background: var(--bg);
       color: var(--ink);
       margin-bottom: 18px;
@@ -136,8 +137,8 @@
       padding: 13px 24px;
       border: 2px solid var(--ink);
       border-radius: var(--radius);
-      font-family: 'Syne', sans-serif;
-      font-size: 13px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
       font-weight: 700;
       letter-spacing: 0.05em;
       text-transform: uppercase;
@@ -179,7 +180,7 @@
 
     .user-bar .name { font-weight: 700; }
     .user-bar .logout {
-      font-family: 'Syne Mono', monospace;
+      font-family: 'Space Mono', monospace;
       font-size: 11px;
       color: var(--muted);
       cursor: pointer;
@@ -197,8 +198,8 @@
       border-radius: var(--radius);
       background: var(--bg);
       margin-bottom: 18px;
-      font-family: 'Syne Mono', monospace;
-      font-size: 11px;
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
       color: var(--muted);
     }
 
@@ -283,8 +284,8 @@
     }
 
     .timer-label {
-      font-family: 'Syne Mono', monospace;
-      font-size: 12px;
+      font-family: 'Space Mono', monospace;
+      font-size: 14px;
       color: var(--muted);
       flex-shrink: 0;
       min-width: 28px;
@@ -312,8 +313,8 @@
     .answer-wrap.revealed { background: var(--ink); color: #fff; }
     .answer-wrap.revealed .song-artist { color: #888; }
 
-    .song-title  { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
-    .song-artist { font-family: 'Syne Mono', monospace; font-size: 13px; }
+    .song-title  { font-size: 2rem; font-weight: 800; margin-bottom: 6px; }
+    .song-artist { font-family: 'Space Mono', monospace; font-size: 14px; }
 
     .game-header {
       display: flex;
@@ -324,8 +325,8 @@
     }
 
     .round-badge {
-      font-family: 'Syne Mono', monospace;
-      font-size: 11px;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
       padding: 4px 12px;
       border: 2px solid var(--ink);
       border-radius: 99px;
@@ -335,8 +336,8 @@
     }
 
     .score-pill {
-      font-family: 'Syne Mono', monospace;
-      font-size: 11px;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
       padding: 4px 12px;
       border: 2px solid var(--ink);
       border-radius: 99px;
@@ -355,8 +356,8 @@
     }
 
     .player-score-pill {
-      font-family: 'Syne Mono', monospace;
-      font-size: 11px;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
       padding: 4px 12px;
       border: 2px solid var(--ink);
       border-radius: 99px;
@@ -382,11 +383,11 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 4px 10px;
+      padding: 5px 12px;
       border: 2px solid var(--ink);
       border-radius: 99px;
-      font-family: 'Syne Mono', monospace;
-      font-size: 11px;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
       background: var(--bg);
     }
 
@@ -430,17 +431,17 @@
     }
 
     .result-row:last-child { border-bottom: none; }
-    .result-name { font-weight: 700; font-size: 14px; }
-    .result-artist { font-family: 'Syne Mono', monospace; font-size: 11px; color: var(--muted); }
+    .result-name { font-weight: 700; font-size: 16px; }
+    .result-artist { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--muted); }
 
     .error-msg {
       display: none;
-      background: #fff0ee;
+      background: #F5F3FF;
       border: 2px solid var(--accent);
       border-radius: var(--radius);
       padding: 10px 14px;
-      font-family: 'Syne Mono', monospace;
-      font-size: 12px;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
       color: var(--accent);
       margin-bottom: 14px;
     }
