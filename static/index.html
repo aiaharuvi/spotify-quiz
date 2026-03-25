@@ -583,9 +583,8 @@
         <div class="song-artist" id="answer-artist">Artist</div>
       </div>
 
-      <div class="btn-row" id="controls-hidden">
+      <div id="controls-hidden">
         <button class="btn btn-primary" id="btn-reveal">👁 Reveal</button>
-        <button class="btn btn-ghost" id="btn-skip">Skip →</button>
       </div>
 
       <div id="controls-revealed" style="display:none">
@@ -800,6 +799,7 @@
       isRevealed = false;
       isPlaying = false;
       clearInterval(clipTimer);
+      if (player && playerReady) player.pause().catch(() => {});
 
       const track = gameTracks[currentRound];
 
@@ -821,10 +821,12 @@
       });
 
       const wrap = document.getElementById('answer-wrap');
+      wrap.style.transition = 'none';
       wrap.classList.add('hidden');
       wrap.classList.remove('revealed');
+      requestAnimationFrame(() => wrap.style.transition = '');
 
-      document.getElementById('controls-hidden').style.display = 'grid';
+      document.getElementById('controls-hidden').style.display = 'block';
       document.getElementById('controls-revealed').style.display = 'none';
 
       document.getElementById('play-btn').textContent = '▶';
@@ -913,7 +915,6 @@
 
     // ── Reveal ────────────────────────────────────────────────────────────────
     document.getElementById('btn-reveal').addEventListener('click', reveal);
-    document.getElementById('btn-skip').addEventListener('click', reveal);
 
     async function reveal() {
       if (isRevealed) return;
