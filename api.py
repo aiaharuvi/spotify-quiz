@@ -53,6 +53,7 @@ def fetch_tracks(sp: spotipy.Spotify, playlist_url: str) -> list[dict]:
             playlist_id,
             limit=50,
             offset=offset,
+            market="from_token",
         )
 
         for item in results["items"]:
@@ -134,13 +135,20 @@ def get_playlist(url: str, session_id: str):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-
-@app.get("/me")
-def get_me(session_id: str):
-    """Check if session is valid and return user info."""
+@app.get("/debug-playlist2")
+def debug_playlist2(url: str, session_id: str):
     sp = get_spotify_for_session(session_id)
-    try:
-        user = sp.me()
-        return {"name": user["display_name"], "logged_in": True}
-    except Exception as e:
-        raise HTTPException(status_code=401, detail=str(e))
+    playlist_id = url.split("/playlist/")[-1].split("?")[0]
+    results = sp.playlist_tracks(playlist_id, limit=5)
+    return {
+        "total": results["total"],
+        "items_count": len(results["items"]),
+        "first_item": results["items"][0] if results["items"] else None,
+    }
+
+@app.get("/debug-session")
+def debug_session(session_id: str):
+    return {
+        "session_exists": session_id in sessions,
+        "all_sessions": list(sessions.keys()),
+    }
