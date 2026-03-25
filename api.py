@@ -57,8 +57,8 @@ def fetch_tracks(sp: spotipy.Spotify, playlist_url: str) -> list[dict]:
         )
 
         for item in results["items"]:
-            track = item.get("track")
-            if not track or not track.get("uri"):
+            track = item.get("track") or item.get("item")
+            if not track or not track.get("uri") or not isinstance(track, dict):
                 continue
             tracks.append({
                 "name": track["name"],
@@ -139,11 +139,39 @@ def get_playlist(url: str, session_id: str):
 def debug_playlist2(url: str, session_id: str):
     sp = get_spotify_for_session(session_id)
     playlist_id = url.split("/playlist/")[-1].split("?")[0]
-    results = sp.playlist_tracks(playlist_id, limit=5)
+
+    # Check token scopes
+    token_info = sessions.get(session_id)
+
+    # Fetch without market first
+    raw = sp.playlist_tracks(playlist_id, limit=5)
+    # Fetch with market
+    with_market = sp.playlist_tracks(playlist_id, limit=5, market="from_token")
+
+    def summarize_items(items):
+        return [
+            {
+                "track_null": item.get("track") is None,
+                "track_type": item["track"].get("type") if item.get("track") else None,
+                "track_uri": item["track"].get("uri") if item.get("track") else None,
+                "is_local": item["track"].get("is_local") if item.get("track") else None,
+                "is_playable": item["track"].get("is_playable") if item.get("track") else None,
+                "name": item["track"].get("name") if item.get("track") else None,
+            }
+            for item in items
+        ]
+
     return {
-        "total": results["total"],
-        "items_count": len(results["items"]),
-        "first_item": results["items"][0] if results["items"] else None,
+        "playlist_id": playlist_id,
+        "token_scope": token_info.get("scope") if token_info else None,
+        "without_market": {
+            "total": raw["total"],
+            "items": summarize_items(raw["items"]),
+        },
+        "with_market": {
+            "total": with_market["total"],
+            "items": summarize_items(with_market["items"]),
+        },
     }
 
 @app.get("/debug-session")
