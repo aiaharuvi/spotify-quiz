@@ -320,6 +320,7 @@
       align-items: center;
       justify-content: space-between;
       margin-bottom: 18px;
+      gap: 8px;
     }
 
     .round-badge {
@@ -329,6 +330,8 @@
       border: 2px solid var(--ink);
       border-radius: 99px;
       background: var(--bg);
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .score-pill {
@@ -342,6 +345,80 @@
     }
 
     .score-pill span { color: var(--accent); font-weight: 800; }
+
+    /* Multiplayer score pills */
+    .scores-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+
+    .player-score-pill {
+      font-family: 'Syne Mono', monospace;
+      font-size: 11px;
+      padding: 4px 12px;
+      border: 2px solid var(--ink);
+      border-radius: 99px;
+      background: var(--ink);
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    .player-score-pill span { color: var(--accent); font-weight: 800; }
+    .player-score-pill.leader { background: var(--accent); border-color: var(--accent); }
+    .player-score-pill.leader span { color: #fff; }
+
+    /* Player chips in setup */
+    .players-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+      min-height: 20px;
+    }
+
+    .player-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border: 2px solid var(--ink);
+      border-radius: 99px;
+      font-family: 'Syne Mono', monospace;
+      font-size: 11px;
+      background: var(--bg);
+    }
+
+    .player-chip button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 14px;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .player-chip button:hover { color: var(--accent); }
+
+    .player-add-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .player-add-row input {
+      margin-bottom: 0;
+      flex: 1;
+    }
+
+    .player-add-row .btn {
+      width: auto;
+      padding: 11px 16px;
+      flex-shrink: 0;
+      box-shadow: 3px 3px 0 var(--ink);
+    }
 
     /* Results */
     .result-row {
@@ -421,7 +498,6 @@
         <span class="logout" id="btn-logout">Log out</span>
       </div>
 
-      <!-- SDK status indicator -->
       <div class="sdk-status">
         <div class="sdk-dot" id="sdk-dot"></div>
         <span id="sdk-status-text">Connecting to Spotify player...</span>
@@ -459,6 +535,13 @@
         <option value="random">Random snippet</option>
       </select>
 
+      <label>Players <span style="font-size:10px;color:var(--muted);text-transform:none;letter-spacing:0;">(optional — for multiplayer)</span></label>
+      <div class="players-chips" id="players-list"></div>
+      <div class="player-add-row">
+        <input id="input-player-name" type="text" placeholder="Player name..." />
+        <button class="btn btn-dark" id="btn-add-player">+ Add</button>
+      </div>
+
       <button class="btn btn-primary" id="btn-load" disabled>Load Playlist →</button>
     </div>
   </div>
@@ -477,7 +560,9 @@
     <div class="card">
       <div class="game-header">
         <div class="round-badge" id="round-badge">Round 1 / 10</div>
-        <div class="score-pill">Score <span id="score-display">0</span></div>
+        <div class="scores-row" id="scores-display">
+          <div class="player-score-pill">Score <span id="score-display">0</span></div>
+        </div>
       </div>
 
       <div class="art-wrap">
@@ -503,9 +588,8 @@
         <button class="btn btn-ghost" id="btn-skip">Skip →</button>
       </div>
 
-      <div class="btn-row" id="controls-revealed" style="display:none">
-        <button class="btn btn-green" id="btn-correct">✓ Got it! +1</button>
-        <button class="btn btn-ghost" id="btn-wrong">✗ Nope</button>
+      <div id="controls-revealed" style="display:none">
+        <div id="player-btns" class="btn-row"></div>
       </div>
     </div>
   </div>
@@ -544,6 +628,7 @@
     let isRevealed = false;
     let isPlaying = false;
     let roundResults = [];
+    let players = []; // [{name, score}]
 
     // ── Spotify SDK callback ──────────────────────────────────────────────────
     window.onSpotifyWebPlaybackSDKReady = () => {
@@ -622,11 +707,9 @@
         accessToken = data.access_token;
         showScreen('setup');
 
-        // Init SDK if already loaded
         if (window.Spotify) {
           initPlayer();
         }
-        // Otherwise onSpotifyWebPlaybackSDKReady will fire and call initPlayer
       } catch {
         localStorage.removeItem('session_id');
         sessionId = null;
@@ -647,6 +730,35 @@
       sessionId = null;
       playerReady = false;
       showScreen('login');
+    });
+
+    // ── Players setup ─────────────────────────────────────────────────────────
+    function renderPlayerChips() {
+      document.getElementById('players-list').innerHTML = players.map((p, i) => `
+        <span class="player-chip">
+          ${p.name}
+          <button onclick="removePlayer(${i})" title="Remove">×</button>
+        </span>
+      `).join('');
+    }
+
+    function addPlayer() {
+      const input = document.getElementById('input-player-name');
+      const name = input.value.trim();
+      if (!name || players.find(p => p.name === name)) return;
+      players.push({ name, score: 0 });
+      input.value = '';
+      renderPlayerChips();
+    }
+
+    function removePlayer(i) {
+      players.splice(i, 1);
+      renderPlayerChips();
+    }
+
+    document.getElementById('btn-add-player').addEventListener('click', addPlayer);
+    document.getElementById('input-player-name').addEventListener('keydown', e => {
+      if (e.key === 'Enter') addPlayer();
     });
 
     // ── Load playlist ─────────────────────────────────────────────────────────
@@ -679,6 +791,7 @@
       currentRound = 0;
       score = 0;
       roundResults = [];
+      players.forEach(p => p.score = 0);
       showScreen('game');
       loadRound();
     }
@@ -691,11 +804,21 @@
       const track = gameTracks[currentRound];
 
       document.getElementById('round-badge').textContent = `Round ${currentRound + 1} / ${totalRounds}`;
-      document.getElementById('score-display').textContent = score;
-      document.getElementById('album-art').src = track.album_art || '';
-      document.getElementById('art-blur').classList.remove('gone');
       document.getElementById('answer-title').textContent = track.name;
       document.getElementById('answer-artist').textContent = track.artist;
+
+      // Set album art now (it's hidden behind the blur)
+      document.getElementById('album-art').src = track.album_art || '';
+
+      // Reset blur instantly — no transition — to avoid flash of revealed art
+      const blur = document.getElementById('art-blur');
+      blur.style.transition = 'none';
+      blur.style.opacity = '1';
+      blur.classList.remove('gone');
+      requestAnimationFrame(() => {
+        blur.style.transition = '';
+        blur.style.opacity = '';
+      });
 
       const wrap = document.getElementById('answer-wrap');
       wrap.classList.add('hidden');
@@ -707,6 +830,22 @@
       document.getElementById('play-btn').textContent = '▶';
       document.getElementById('progress-fill').style.width = '0%';
       document.getElementById('timer-label').textContent = '0s';
+
+      updateScoreDisplay();
+    }
+
+    function updateScoreDisplay() {
+      const container = document.getElementById('scores-display');
+      if (players.length === 0) {
+        container.innerHTML = `<div class="player-score-pill">Score <span>${score}</span></div>`;
+      } else {
+        const maxScore = Math.max(...players.map(p => p.score));
+        container.innerHTML = players.map(p => `
+          <div class="player-score-pill ${p.score > 0 && p.score === maxScore ? 'leader' : ''}">
+            ${p.name} <span>${p.score}</span>
+          </div>
+        `).join('');
+      }
     }
 
     // ── Playback ──────────────────────────────────────────────────────────────
@@ -724,7 +863,6 @@
       const track = gameTracks[currentRound];
       const uri = track.uri;
 
-      // Calculate start position
       let positionMs = 0;
       if (clipMode === 'random') {
         const durationMs = track.duration_ms;
@@ -733,7 +871,6 @@
       }
 
       try {
-        // Tell Spotify to play this track on our device
         await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
           method: 'PUT',
           headers: {
@@ -756,7 +893,6 @@
 
     function startClipTimer(startMs) {
       clearInterval(clipTimer);
-      const endMs = startMs + (clipDuration * 1000);
       const startTime = Date.now();
 
       clipTimer = setInterval(async () => {
@@ -795,21 +931,52 @@
       wrap.classList.add('revealed');
 
       document.getElementById('controls-hidden').style.display = 'none';
-      document.getElementById('controls-revealed').style.display = 'grid';
+
+      // Build scoring buttons
+      const btnContainer = document.getElementById('player-btns');
+      if (players.length === 0) {
+        // Single player mode
+        btnContainer.style.gridTemplateColumns = '1fr 1fr';
+        btnContainer.innerHTML = `
+          <button class="btn btn-green" id="btn-correct">✓ Got it! +1</button>
+          <button class="btn btn-ghost" id="btn-wrong">✗ Nope</button>
+        `;
+        document.getElementById('btn-correct').addEventListener('click', () => {
+          score++;
+          roundResults.push({ ...gameTracks[currentRound], got_it: true, scorer: null });
+          nextRound();
+        });
+        document.getElementById('btn-wrong').addEventListener('click', () => {
+          roundResults.push({ ...gameTracks[currentRound], got_it: false, scorer: null });
+          nextRound();
+        });
+      } else {
+        // Multiplayer mode — one button per player + nobody
+        const cols = Math.min(players.length + 1, 3);
+        btnContainer.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+        btnContainer.innerHTML = players.map((p, i) => `
+          <button class="btn btn-green" data-idx="${i}">${p.name} +1</button>
+        `).join('') + `<button class="btn btn-ghost" data-idx="-1">Nobody</button>`;
+
+        btnContainer.querySelectorAll('button').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const idx = parseInt(btn.dataset.idx);
+            if (idx >= 0) {
+              players[idx].score++;
+              roundResults.push({ ...gameTracks[currentRound], got_it: true, scorer: players[idx].name });
+            } else {
+              roundResults.push({ ...gameTracks[currentRound], got_it: false, scorer: null });
+            }
+            updateScoreDisplay();
+            nextRound();
+          });
+        });
+      }
+
+      document.getElementById('controls-revealed').style.display = 'block';
     }
 
-    // ── Score ─────────────────────────────────────────────────────────────────
-    document.getElementById('btn-correct').addEventListener('click', () => {
-      score++;
-      roundResults.push({ ...gameTracks[currentRound], got_it: true });
-      nextRound();
-    });
-
-    document.getElementById('btn-wrong').addEventListener('click', () => {
-      roundResults.push({ ...gameTracks[currentRound], got_it: false });
-      nextRound();
-    });
-
+    // ── Next round ────────────────────────────────────────────────────────────
     function nextRound() {
       currentRound++;
       currentRound >= totalRounds ? endGame() : loadRound();
@@ -818,21 +985,54 @@
     // ── End ───────────────────────────────────────────────────────────────────
     function endGame() {
       showScreen('scoreboard');
-      document.getElementById('final-pts').textContent = `${score} / ${totalRounds}`;
-      document.getElementById('final-sub').textContent =
-        score === totalRounds ? '🔥 Perfect score!' :
-        score >= totalRounds * 0.7 ? '🎉 Great round!' :
-        score >= totalRounds * 0.4 ? '👍 Not bad!' : '😅 Keep practicing!';
 
-      document.getElementById('final-track-list').innerHTML = roundResults.map(r => `
-        <div class="result-row">
-          <span style="font-size:1.1rem">${r.got_it ? '✅' : '❌'}</span>
-          <div>
-            <div class="result-name">${r.name}</div>
-            <div class="result-artist">${r.artist}</div>
+      if (players.length === 0) {
+        document.getElementById('final-pts').textContent = `${score} / ${totalRounds}`;
+        document.getElementById('final-sub').textContent =
+          score === totalRounds ? '🔥 Perfect score!' :
+          score >= totalRounds * 0.7 ? '🎉 Great round!' :
+          score >= totalRounds * 0.4 ? '👍 Not bad!' : '😅 Keep practicing!';
+
+        document.getElementById('final-track-list').innerHTML = roundResults.map(r => `
+          <div class="result-row">
+            <span style="font-size:1.1rem">${r.got_it ? '✅' : '❌'}</span>
+            <div>
+              <div class="result-name">${r.name}</div>
+              <div class="result-artist">${r.artist}</div>
+            </div>
           </div>
-        </div>
-      `).join('');
+        `).join('');
+      } else {
+        const sorted = [...players].sort((a, b) => b.score - a.score);
+        const winner = sorted[0];
+        document.getElementById('final-pts').textContent = winner.name;
+        document.getElementById('final-sub').textContent =
+          `🏆 Winner with ${winner.score} point${winner.score !== 1 ? 's' : ''}!`;
+
+        const medals = ['🥇', '🥈', '🥉'];
+        const playerRows = sorted.map((p, i) => `
+          <div class="result-row">
+            <span style="font-size:1.1rem">${medals[i] || ''}</span>
+            <div>
+              <div class="result-name">${p.name}</div>
+              <div class="result-artist">${p.score} point${p.score !== 1 ? 's' : ''}</div>
+            </div>
+          </div>
+        `).join('');
+
+        const trackRows = roundResults.map(r => `
+          <div class="result-row">
+            <span style="font-size:1.1rem">${r.got_it ? '✅' : '❌'}</span>
+            <div>
+              <div class="result-name">${r.name}</div>
+              <div class="result-artist">${r.artist}${r.scorer ? ` · ${r.scorer}` : ''}</div>
+            </div>
+          </div>
+        `).join('');
+
+        document.getElementById('final-track-list').innerHTML =
+          playerRows + '<div class="divider"></div>' + trackRows;
+      }
     }
 
     document.getElementById('btn-restart').addEventListener('click', () => showScreen('setup'));
