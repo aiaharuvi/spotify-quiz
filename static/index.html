@@ -804,8 +804,8 @@
       const track = gameTracks[currentRound];
 
       document.getElementById('round-badge').textContent = `Round ${currentRound + 1} / ${totalRounds}`;
-      document.getElementById('answer-title').textContent = track.name;
-      document.getElementById('answer-artist').textContent = track.artist;
+      document.getElementById('answer-title').textContent = '';
+      document.getElementById('answer-artist').textContent = '';
 
       // Set album art now (it's hidden behind the blur)
       document.getElementById('album-art').src = track.album_art || '';
@@ -926,6 +926,10 @@
       }
 
       document.getElementById('art-blur').classList.add('gone');
+
+      const track = gameTracks[currentRound];
+      document.getElementById('answer-title').textContent = track.name;
+      document.getElementById('answer-artist').textContent = track.artist;
 
       const wrap = document.getElementById('answer-wrap');
       wrap.classList.remove('hidden');

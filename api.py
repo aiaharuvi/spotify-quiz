@@ -9,6 +9,8 @@ from fastapi.responses import FileResponse, RedirectResponse
 from dotenv import load_dotenv
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+from spotipy.exceptions import SpotifyException
+from spotipy.cache_handler import MemoryCacheHandler
 
 load_dotenv()
 
@@ -27,6 +29,7 @@ def get_oauth():
         client_secret=os.getenv("SPOTIPY_CLIENT_SECRET"),
         redirect_uri=os.getenv("SPOTIPY_REDIRECT_URI"),
         scope=SCOPE,
+        cache_handler=MemoryCacheHandler(),
     )
 
 
@@ -132,6 +135,10 @@ def get_playlist(url: str, session_id: str):
         return {"tracks": tracks}
     except HTTPException:
         raise
+    except SpotifyException as e:
+        if e.http_status == 403:
+            raise HTTPException(status_code=403, detail="This playlist is private and belongs to another Spotify account. The playlist owner needs to make it public or collaborative, or log in with their account.")
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
